@@ -1,1 +1,32 @@
-# sashiosae-calc
+# sashiosae-calc<script>
+function calculate() {
+  const netIncomeInput = Number(document.getElementById("netIncome").value);
+  const dependents = Number(document.getElementById("dependents").value) || 0;
+
+  if (!netIncomeInput) {
+    alert("手取り額を入力してください");
+    return;
+  }
+
+  // ① 手取り額：千円未満切捨て
+  const A = Math.floor(netIncomeInput / 1000) * 1000;
+
+  // ② 基礎額
+  const C = 100000 + 45000 * dependents;
+
+  // ③ 差押え禁止額（基礎額＋超過分の20％）
+  const B = C + Math.max(0, A - C) * 0.2;
+
+  // ④ 差押え可能額
+  const attachable = Math.max(0, A - B);
+
+  document.getElementById("resultNet").textContent =
+    A.toLocaleString() + " 円";
+
+  document.getElementById("resultProtected").textContent =
+    Math.floor(B).toLocaleString() + " 円";
+
+  document.getElementById("resultAttachable").textContent =
+    Math.floor(attachable).toLocaleString() + " 円";
+}
+</script>
