@@ -6,13 +6,29 @@
 </head>
 <body>
 
-<h2>表示テスト成功</h2>
+<h2>差押え可能額計算</h2>
 
-<p>この文字が見えればHTMLは生きています。</p>
+<label>
+  手取り額（円）：
+  <input type="number" id="netIncome">
+</label>
 
-<script>
-console.log("JavaScriptも動いています");
-</script>
+<br><br>
+
+<label>
+  扶養人数：
+  <input type="number" id="dependents" value="0" min="0">
+</label>
+
+<br><br>
+
+<button>計算</button>
+
+<hr>
+
+<p>手取り額：<span>-</span></p>
+<p>差押え禁止額：<span>-</span></p>
+<p>差押え可能額：<span>-</span></p>
 
 </body>
 </html>
