@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <title>差押え可能額計算</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
 </head>
 <body>
 
@@ -22,19 +23,47 @@
 
 <br><br>
 
-<button>計算</button>
+<button id="calcBtn">計算</button>
 
 <hr>
 
-<p>手取り額：<span>-</span></p>
-<p>差押え禁止額：<span>-</span></p>
-<p>差押え可能額：<span>-</span></p>
+<p>手取り額（千円未満切捨て）：<span id="resultNet">-</span></p>
+<p>差押え禁止額：<span id="resultProtected">-</span></p>
+<p><strong>差押え可能額：</strong><span id="resultAttachable">-</span></p>
 
-</body>
-  <script>
-document.querySelector("button").onclick = function () {
-  alert("JavaScriptが動いています");
-};
+<script>
+document.getElementById("calcBtn").addEventListener("click", function () {
+
+  var netIncomeInput = document.getElementById("netIncome").value;
+  var dependents = parseInt(document.getElementById("dependents").value, 10) || 0;
+
+  if (netIncomeInput === "") {
+    alert("手取り額を入力してください");
+    return;
+  }
+
+  // 手取り額（千円未満切捨て）
+  var A = Math.floor(netIncomeInput / 1000) * 1000;
+
+  // 基礎額
+  var C = 100000 + 45000 * dependents;
+
+  // 差押え禁止額（基礎額 + 超過分の20％）
+  var B = C + Math.max(0, A - C) * 0.2;
+
+  // 差押え可能額
+  var D = Math.max(0, A - B);
+
+  document.getElementById("resultNet").textContent =
+    A.toLocaleString() + " 円";
+
+  document.getElementById("resultProtected").textContent =
+    Math.floor(B).toLocaleString() + " 円";
+
+  document.getElementById("resultAttachable").textContent =
+    Math.floor(D).toLocaleString() + " 円";
+});
 </script>
 
+</body>
 </html>
