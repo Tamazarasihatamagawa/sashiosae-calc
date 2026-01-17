@@ -1,146 +1,32 @@
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-  <meta charset="UTF-8">
-  <title>差押可能額計算（国税徴収法76条）</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-  <style>
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-      padding: 20px;
-      background: #ffffff;
-    }
-    h1 {
-      font-size: 22px;
-      margin-bottom: 10px;
-    }
-    select, input, button {
-      width: 100%;
-      font-size: 17px;
-      padding: 10px;
-      margin-top: 10px;
-    }
-    .box {
-      margin-top: 20px;
-      padding: 15px;
-      background: #f5f5f5;
-      border-radius: 10px;
-    }
-    .result {
-      font-size: 17px;
-      margin-top: 6px;
-    }
-    .small {
-      font-size: 13px;
-      color: #555;
-      margin-top: 10px;
-    }
-    .footer {
-      font-size: 12px;
-      color: #666;
-      margin-top: 25px;
-      border-top: 1px solid #ddd;
-      padding-top: 10px;
-    }
-
-    /* ===== 印刷（PDF）専用 ===== */
-    @media print {
-      body {
-        padding: 0;
-      }
-      button, select, input {
-        display: none;
-      }
-      h1 {
-        text-align: center;
-        margin-bottom: 20px;
-      }
-      .box {
-        background: #fff;
-        border: 1px solid #000;
-        border-radius: 0;
-      }
-      .footer {
-        margin-top: 40px;
-        border-top: none;
-      }
-    }
-  </style>
-</head>
-<body>
-
-<h1>差押可能額算定表</h1>
-
-<select id="year">
-  <option value="2024">令和6年度</option>
-  <option value="2025">令和7年度</option>
-</select>
-
-<select id="mode">
-  <option value="salary">月例給与</option>
-  <option value="bonus">賞与</option>
-</select>
-
-<input id="income" type="number" placeholder="手取り収入（円）">
-<input id="family" type="number" placeholder="扶養人数（人）" min="0">
-
-<button onclick="calculate()">計算する</button>
-<button onclick="window.print()">PDF出力（帳票）</button>
-
-<div class="box">
-  <div class="result" id="modeText"></div>
-  <div class="result" id="yearText"></div>
-  <div class="result" id="incomeAdj"></div>
-  <div class="result" id="kinshi"></div>
-  <div class="result" id="kanou"></div>
-  <div class="small" id="time"></div>
-</div>
-
-<div class="footer">
-  【法的根拠】<br>
-  国税徴収法第76条第1項<br>
-  差押禁止額は生活扶助基準等を基礎として算定し、千円未満の端数は切り上げる。
-</div>
-
 <script>
-  const TABLE = {
-    "2024": { kiso: 330000, fuyou: 33000 },
-    "2025": { kiso: 330000, fuyou: 33000 }
-  };
+function calculate() {
+  const netIncomeInput = Number(document.getElementById("netIncome").value);
+  const dependents = Number(document.getElementById("dependents").value) || 0;
 
-  function calculate() {
-    const year = document.getElementById("year").value;
-    const mode = document.getElementById("mode").value;
-    const incomeRaw = Number(document.getElementById("income").value) || 0;
-    const family = Number(document.getElementById("family").value) || 0;
-
-    const kiso = TABLE[year].kiso;
-    const fuyou = TABLE[year].fuyou;
-
-    const income = Math.floor(incomeRaw / 1000) * 1000;
-    const kinshi = Math.ceil((kiso + family * fuyou) / 1000) * 1000;
-    const kanou = Math.max(0, income - kinshi);
-
-    document.getElementById("modeText").innerText =
-      "区分： " + (mode === "salary" ? "月例給与" : "賞与");
-
-    document.getElementById("yearText").innerText =
-      "適用年度： 令和" + (year - 2018) + "年度";
-
-    document.getElementById("incomeAdj").innerText =
-      "手取り収入（千円未満切捨）： " + income.toLocaleString() + " 円";
-
-    document.getElementById("kinshi").innerText =
-      "差押禁止額（千円未満切上）： " + kinshi.toLocaleString() + " 円";
-
-    document.getElementById("kanou").innerText =
-      "差押可能額： " + kanou.toLocaleString() + " 円";
-
-    document.getElementById("time").innerText =
-      "算定日時： " + new Date().toLocaleString();
+  if (!netIncomeInput) {
+    alert("手取り額を入力してください");
+    return;
   }
-</script>
 
-</body>
-</html>
+  // ① 手取り額：千円未満切捨て
+  const A = Math.floor(netIncomeInput / 1000) * 1000;
+
+  // ② 基礎額
+  const C = 100000 + 45000 * dependents;
+
+  // ③ 差押え禁止額（基礎額＋超過分の20％）
+  const B = C + Math.max(0, A - C) * 0.2;
+
+  // ④ 差押え可能額
+  const attachable = Math.max(0, A - B);
+
+  document.getElementById("resultNet").textContent =
+    A.toLocaleString() + " 円";
+
+  document.getElementById("resultProtected").textContent =
+    Math.floor(B).toLocaleString() + " 円";
+
+  document.getElementById("resultAttachable").textContent =
+    Math.floor(attachable).toLocaleString() + " 円";
+}
+</script>
