@@ -1,35 +1,107 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<meta charset="UTF-8">
-<title>差押え可能額計算</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="UTF-8">
+  <title>差押可能額計算（国税徴収法76条）</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+      padding: 20px;
+      background: #ffffff;
+    }
+    h1 {
+      font-size: 22px;
+      margin-bottom: 10px;
+    }
+    select, input, button {
+      width: 100%;
+      font-size: 17px;
+      padding: 10px;
+      margin-top: 10px;
+    }
+    .box {
+      margin-top: 20px;
+      padding: 15px;
+      background: #f5f5f5;
+      border-radius: 10px;
+    }
+    .result {
+      font-size: 17px;
+      margin-top: 6px;
+    }
+    .small {
+      font-size: 13px;
+      color: #555;
+      margin-top: 10px;
+    }
+    .footer {
+      font-size: 12px;
+      color: #666;
+      margin-top: 25px;
+      border-top: 1px solid #ddd;
+      padding-top: 10px;
+    }
+
+    /* ===== 印刷（PDF）専用 ===== */
+    @media print {
+      body {
+        padding: 0;
+      }
+      button, select, input {
+        display: none;
+      }
+      h1 {
+        text-align: center;
+        margin-bottom: 20px;
+      }
+      .box {
+        background: #fff;
+        border: 1px solid #000;
+        border-radius: 0;
+      }
+      .footer {
+        margin-top: 40px;
+        border-top: none;
+      }
+    }
+  </style>
 </head>
 <body>
 
-<h2>差押え可能額計算</h2>
+<h1>差押可能額算定表</h1>
 
-<label>
-  手取り額（円）：
-  <input type="number" id="netIncome">
-</label>
+<select id="year">
+  <option value="2024">令和6年度</option>
+  <option value="2025">令和7年度</option>
+</select>
 
-<br><br>
+<select id="mode">
+  <option value="salary">月例給与</option>
+  <option value="bonus">賞与</option>
+</select>
 
-<label>
-  扶養人数：
-  <input type="number" id="dependents" value="0" min="0">
-</label>
+<input id="income" type="number" placeholder="手取り収入（円）">
+<input id="family" type="number" placeholder="扶養人数（人）" min="0">
 
-<br><br>
+<button onclick="calculate()">計算する</button>
+<button onclick="window.print()">PDF出力（帳票）</button>
 
-<button id="calcBtn">計算</button>
+<div class="box">
+  <div class="result" id="modeText"></div>
+  <div class="result" id="yearText"></div>
+  <div class="result" id="incomeAdj"></div>
+  <div class="result" id="kinshi"></div>
+  <div class="result" id="kanou"></div>
+  <div class="small" id="time"></div>
+</div>
 
-<hr>
-
-<p>手取り額（千円未満切捨て）：<span id="resultNet">-</span></p>
-<p>差押え禁止額：<span id="resultProtected">-</span></p>
-<p><strong>差押え可能額：</strong><span id="resultAttachable">-</span></p>
+<div class="footer">
+  【法的根拠】<br>
+  国税徴収法第76条第1項<br>
+  差押禁止額は生活扶助基準等を基礎として算定し、千円未満の端数は切り上げる。
+</div>
 
 <script>
 document.getElementById("calcBtn").addEventListener("click", function () {
