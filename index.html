@@ -120,8 +120,11 @@ function calculate() {
   // 基礎額
   var C = 100000 + 45000 * dependents;
 
-  // 差押え禁止額（基礎額 + 超過分の20％）
-  var B = C + Math.max(0, A - C) * 0.2;
+  // 差押え禁止額（端数あり）
+  var B_raw = C + Math.max(0, A - C) * 0.2;
+
+  // 差押え禁止額（1,000円未満切り上げ）
+  var B = Math.ceil(B_raw / 1000) * 1000;
 
   // 差押え可能額
   var D = Math.max(0, A - B);
@@ -130,15 +133,16 @@ function calculate() {
     "調整後手取り額：" + A.toLocaleString() + " 円";
 
   document.getElementById("kinshi").textContent =
-    "差押え禁止額：" + Math.floor(B).toLocaleString() + " 円";
+    "差押え禁止額：" + B.toLocaleString() + " 円";
 
   document.getElementById("kanou").textContent =
-    "差押え可能額：" + Math.floor(D).toLocaleString() + " 円";
+    "差押え可能額：" + D.toLocaleString() + " 円";
 
   document.getElementById("time").textContent =
     "算定日時：" + new Date().toLocaleString();
 }
 </script>
+
 
 </body>
 </html>
