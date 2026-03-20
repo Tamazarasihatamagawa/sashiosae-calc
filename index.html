@@ -73,10 +73,10 @@
 <h1>差押可能額算定表</h1>
 
 <select id="year">
-  <option value="2024">令和6年度</option>
   <option value="2025">令和7年度</option>
+  <option value="2026" selected>令和8年度（改正後）</option>
 </select>
-
+  
 <select id="mode">
   <option value="salary">月例給与</option>
   <option value="bonus">賞与</option>
@@ -108,6 +108,7 @@ function calculate() {
 
   var netIncomeInput = document.getElementById("income").value;
   var dependents = parseInt(document.getElementById("family").value, 10) || 0;
+  var year = document.getElementById("year").value;
 
   if (netIncomeInput === "") {
     alert("手取り収入を入力してください");
@@ -117,8 +118,21 @@ function calculate() {
   // 手取り額（千円未満切捨て）
   var A = Math.floor(netIncomeInput / 1000) * 1000;
 
-  // 基礎額
-  var C = 100000 + 45000 * dependents;
+  // ===== 年度別 基礎額 =====
+  var base;
+  var perPerson;
+
+  if (year === "2026") {
+    // 令和8年度（改正後）
+    base = 107000;
+    perPerson = 48000;
+  } else {
+    // 令和7年度
+    base = 100000;
+    perPerson = 45000;
+  }
+
+  var C = base + perPerson * dependents;
 
   // 差押え禁止額（端数あり）
   var B_raw = C + Math.max(0, A - C) * 0.2;
@@ -129,6 +143,7 @@ function calculate() {
   // 差押え可能額
   var D = Math.max(0, A - B);
 
+  // 表示
   document.getElementById("incomeAdj").textContent =
     "調整後手取り額：" + A.toLocaleString() + " 円";
 
@@ -137,6 +152,9 @@ function calculate() {
 
   document.getElementById("kanou").textContent =
     "差押え可能額：" + D.toLocaleString() + " 円";
+
+  document.getElementById("yearText").textContent =
+    (year === "2026" ? "令和8年度（改正後）" : "令和7年度");
 
   document.getElementById("time").textContent =
     "算定日時：" + new Date().toLocaleString();
